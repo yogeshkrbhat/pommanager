@@ -1,14 +1,16 @@
 Prerequisites:
-Create “data” folder in current path with pom.xml. This can be changed by modifying DATA_ROOT in pommanager\updateversion.py. 
+pom.xml should be present in same folder as script. 
 
 Run script: 
-python pommanager\updateversion.py
+cd pommanager
+python updateversion.py
 
 Run Unit test: 
-python -m unittest pommanager.test_updateversion
+cd pommanager
+python -m unittest test_updateversion
 
 Docker:
 Docker build –t pommanager .
 
 Todo:
-Config file to keep DATA_ROOT, LOG_FILE, INPUT_POM, OUTPUT_POM initial values
+Config file to keep VERSION_FORMAT, LOG_FILE, POM_FILE

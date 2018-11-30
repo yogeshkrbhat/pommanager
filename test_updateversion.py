@@ -1,8 +1,9 @@
 import unittest
 import os
 import shutil
+import mock
 
-from pommanager.updateversion import read_pom, is_snapshot, update_verion
+from updateversion import read_pom, is_snapshot, update_verion, get_repo_n_branch
 
 class BaseJobTestCase(unittest.TestCase):
     pwd = os.getcwd()
@@ -61,4 +62,13 @@ class BaseJobTestCase(unittest.TestCase):
         tree, nsmap = read_pom("pom_updated.xml")
         version = tree.xpath('.//xmlns:version', namespaces=nsmap)[0]
         self.assertNotEquals(version, 'ci_com.wsi.devops_python-test-SNAPSHOT')
+    
+    @mock.patch('git.Repo')
+    def test_get_repo_n_branch(self, repo):
+        repo.return_value.active_branch.name = "master"
+        repo.return_value.remotes[0].url = "https://github.com/Team_Foo/pommanager.git"
+        (orgname, branch) = get_repo_n_branch()
+        self.assertEquals(orgname, "Team_Foo")
+        self.assertEquals(branch, "master")
+        
         

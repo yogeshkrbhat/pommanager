@@ -2,6 +2,7 @@ from lxml import etree
 import logging
 
 POM_FILE = 'pom.xml'
+VERSION_FORMAT = "ci_{}_{}-SNAPSHOT"
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -30,15 +31,22 @@ def is_snapshot(tree, nsmap):
 
 def get_repo_n_branch():
     from git import Repo
-    g = Repo(".")
-    return (g.remotes[0].url.split('/')[-1], g.active_branch.name)
+    try:
+        repo = Repo(".")
+        branch = repo.active_branch.name
+        orgname = repo.remotes[0].url.split('github.com')[1].split('/')[1]
+        return (orgname, branch)
+    except:
+        logging.exception("Error while getting org-name and branch")
+        return (None, None)
 
 def update_verion(tree, nsmap, file):
     try:
         version = tree.xpath('.//xmlns:version', namespaces=nsmap)[0]
         artifactId = tree.xpath('.//xmlns:artifactId', namespaces=nsmap)[0]
         groupId = tree.xpath('.//xmlns:groupId', namespaces=nsmap)[0]
-        version.text = "ci_%s_%s-SNAPSHOT" % get_repo_n_branch()
+        org, branch = get_repo_n_branch()
+        version.text = VERSION_FORMAT.format(org, branch)
         tree.write(file)
         logging.info("Created new pom here: %s" % file)
     except:
