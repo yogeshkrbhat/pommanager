@@ -1,14 +1,19 @@
 from lxml import etree
 import logging
+import os
 
 POM_FILE = 'pom.xml'
 VERSION_FORMAT = "ci_{}_{}-SNAPSHOT"
 
 logging.basicConfig(level=logging.DEBUG)
 
-def read_pom(file):
+def validate_pom(file):
+    if not os.path.isfile(file):
+        logging.error("File %s not exists" % file)
+        return (None, None)
+
     try:
-        logging.info("Reading pom xml from %s" % file)
+        logging.info("Validate pom xml from %s" % file)
         tree = etree.parse(file)
         nsmap = tree.getroot().nsmap.copy()
         nsmap['xmlns'] = nsmap.pop(None)
@@ -54,9 +59,12 @@ def update_verion(tree, nsmap, file):
 
 
 def main():
-    (tree, nsmap) = read_pom(POM_FILE)
-    if tree and is_snapshot(tree, nsmap):
-        update_verion(tree, nsmap, POM_FILE)
-    
+    (tree, nsmap) = validate_pom(POM_FILE)
+    if tree:
+        if is_snapshot(tree, nsmap):
+            update_verion(tree, nsmap, POM_FILE)
+    else:
+        logging.info("POM validation failed")
+
 if __name__ == '__main__':
     main()
